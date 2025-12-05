@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Mercury API Access</label>
+    <hasActivationRequired>false</hasActivationRequired>
+    <description>Permission set for Mercury API access. Assign to users who need to create invoices.</description>
+</PermissionSet>

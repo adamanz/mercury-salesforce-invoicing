@@ -6,11 +6,11 @@
 
 Generate and send invoices via Mercury's Accounts Receivable API directly from Salesforce Opportunities. Automatically close opportunities as Won when invoices are paid.
 
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYK9AAO">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO">
   <img src="https://img.shields.io/badge/Install%20Package-Production-blue?style=for-the-badge&logo=salesforce" alt="Install in Production"/>
 </a>
 &nbsp;
-<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYK9AAO">
+<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO">
   <img src="https://img.shields.io/badge/Install%20Package-Sandbox-orange?style=for-the-badge&logo=salesforce" alt="Install in Sandbox"/>
 </a>
 
@@ -23,6 +23,7 @@ Generate and send invoices via Mercury's Accounts Receivable API directly from S
 - **Status Polling** - Scheduled job polls Mercury for invoice status updates (Mercury doesn't support webhooks)
 - **Auto-Close Won** - Automatically sets Opportunity to "Closed Won" when invoice is paid
 - **Error Tracking** - Comprehensive error logging with retry logic for transient failures
+- **Pre-configured Components** - Named Credential, Remote Site Setting, and Permission Set included
 
 ## Architecture
 
@@ -52,8 +53,8 @@ Generate and send invoices via Mercury's Accounts Receivable API directly from S
 ### Option 1: Install Package (Recommended)
 
 Click the button above or use these links:
-- **Production/Developer**: https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYK9AAO
-- **Sandbox**: https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYK9AAO
+- **Production/Developer**: https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO
+- **Sandbox**: https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO
 
 ### Option 2: Deploy from Source
 
@@ -66,51 +67,64 @@ cd mercury-salesforce-invoicing
 sf project deploy start --target-org your-org-alias
 ```
 
-## Post-Installation Setup
+## Quick Start (3 Steps)
 
-### 1. Configure Named Credential
+The package includes pre-configured Named Credential, Remote Site Setting, and Permission Set to minimize setup.
 
-1. Go to **Setup → Named Credentials → External Credentials**
-2. Click **New External Credential**
-3. Configure:
-   - Label: `Mercury_External`
-   - Authentication Protocol: `Custom`
-4. Add a Principal with:
-   - Parameter Name: `Authorization`
-   - Value: `Bearer secret-token:YOUR_MERCURY_TOKEN`
-5. Create Named Credential pointing to this External Credential
+### Step 1: Add Your Mercury Token
 
-**Or use Legacy Named Credential:**
-1. Go to **Setup → Named Credentials → Legacy**
-2. Create new with:
-   - Label: `Mercury_API`
-   - URL: `https://api.mercury.com`
-   - Authentication: Custom Header
-   - Header: `Authorization` = `Bearer secret-token:YOUR_TOKEN`
+1. Go to **Setup → Named Credentials → Named Credentials**
+2. Click **Mercury_API** (already created by the package)
+3. Click **Edit** and add a Custom Header:
+   - Header Name: `Authorization`
+   - Header Value: `Bearer secret-token:YOUR_MERCURY_TOKEN`
+4. Save
 
-### 2. Add "Invoice" Stage to Opportunity
+### Step 2: Assign Permission Set
 
-If you don't have an "Invoice" stage in your Sales Process:
-1. Go to **Setup → Object Manager → Opportunity → Fields → Stage**
-2. Add "Invoice" as a picklist value
+1. Go to **Setup → Permission Sets**
+2. Click **Mercury API Access**
+3. Click **Manage Assignments → Add Assignment**
+4. Select users who need to create invoices
 
-### 3. Schedule the Status Checker
+### Step 3: Schedule Status Checker
 
-Run in **Developer Console → Anonymous Apex**:
+Run in **Developer Console → Execute Anonymous**:
 
 ```apex
 MercuryInvoiceStatusChecker.scheduleHourly();
 ```
 
-### 4. Configure IP Allowlist (Required for Write Tokens)
+**That's it!** The integration is ready to use.
 
-Add your Salesforce org's outbound IPs to Mercury's token allowlist:
-1. Find your Salesforce IPs at **Setup → Company Information**
+---
+
+## Additional Setup (Optional)
+
+### Add "Invoice" Stage to Opportunity
+
+If you don't have an "Invoice" stage:
+1. Go to **Setup → Object Manager → Opportunity → Fields → Stage**
+2. Add "Invoice" as a picklist value
+
+### Configure IP Allowlist (Required for Write Tokens)
+
+Add your Salesforce org's outbound IPs to Mercury:
+1. Find IPs at **Setup → Company Information**
 2. Add them at [Mercury Token Settings](https://app.mercury.com/settings/tokens)
 
-## Custom Fields
+## What's Included
 
-### Account
+### Pre-Configured Components
+| Component | Name | Description |
+|-----------|------|-------------|
+| Named Credential | `Mercury_API` | Pre-configured for Mercury API (just add your token) |
+| Remote Site Setting | `Mercury_API` | Allows callouts to api.mercury.com |
+| Permission Set | `Mercury API Access` | Controls who can use the integration |
+
+### Custom Fields
+
+**Account:**
 | Field | Type | Description |
 |-------|------|-------------|
 | `Mercury_Customer_Id__c` | Text(50) | Mercury customer ID |
@@ -118,7 +132,7 @@ Add your Salesforce org's outbound IPs to Mercury's token allowlist:
 | `Mercury_Error_Message__c` | Text(255) | Last error message |
 | `Mercury_Last_Sync_Attempt__c` | DateTime | Last sync timestamp |
 
-### Opportunity
+**Opportunity:**
 | Field | Type | Description |
 |-------|------|-------------|
 | `Mercury_Invoice_Id__c` | Text(50) | Mercury invoice ID |
@@ -126,6 +140,23 @@ Add your Salesforce org's outbound IPs to Mercury's token allowlist:
 | `Mercury_Invoice_URL__c` | URL | Link to Mercury payment page |
 | `Mercury_Error_Message__c` | Text(255) | Last error message |
 | `Mercury_Last_Sync_Attempt__c` | DateTime | Last sync timestamp |
+
+### Apex Classes
+- `MercuryService` - Core API service
+- `MercuryInvoiceHandler` - Queueable for invoice creation
+- `MercuryInvoiceStatusChecker` - Schedulable for polling
+- `MercuryInvoiceStatusQueueable` - Queueable for status checks
+- `MercuryRetryableException` - For retryable errors (429, 5xx)
+- `MercuryNonRetryableException` - For non-retryable errors (4xx)
+
+### Test Classes (22 tests, 100% pass rate)
+- `MercuryServiceTest` - Unit tests for service
+- `MercuryStatusSyncTest` - Status sync tests
+- `MercuryIntegrationFlowTest` - End-to-end tests
+- `MercuryMockFactory` - Mock response factory
+
+### Trigger
+- `OpportunityTrigger` - Fires on stage change to "Invoice"
 
 ## Usage
 
@@ -139,26 +170,18 @@ Add your Salesforce org's outbound IPs to Mercury's token allowlist:
    - Scheduled job detects "paid" status
    - Opportunity automatically moves to "Closed Won"
 
-## API Reference
+## Error Handling
 
-### Mercury Endpoints Used
+| Code | Meaning | Retryable | Action |
+|------|---------|-----------|--------|
+| 400 | Bad Request | No | Check required fields |
+| 401 | Unauthorized | No | Rotate token |
+| 403 | Forbidden | No | Check Mercury subscription |
+| 404 | Not Found | No | Verify customer/invoice ID |
+| 429 | Rate Limited | Yes | Auto-retry with backoff |
+| 5xx | Server Error | Yes | Auto-retry with backoff |
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/ar/customers` | Create customer |
-| POST | `/ar/invoices` | Create & send invoice |
-| GET | `/ar/invoices/{id}` | Get invoice status |
-
-### Error Handling
-
-| Code | Meaning | Retryable |
-|------|---------|-----------|
-| 400 | Bad Request | No |
-| 401 | Unauthorized | No - rotate token |
-| 403 | Forbidden | No - check subscription |
-| 404 | Not Found | No |
-| 429 | Rate Limited | Yes |
-| 5xx | Server Error | Yes |
+Errors are logged to `Mercury_Error_Message__c` on the Account or Opportunity record.
 
 ## Testing
 
@@ -172,25 +195,6 @@ sf apex run test --class-names MercuryServiceTest --class-names MercuryStatusSyn
 - Create test invoices with small amounts ($1)
 - Cancel immediately via API or Mercury UI
 - Use internal email addresses for test customers
-
-## Components
-
-### Apex Classes
-- `MercuryService` - Core API service
-- `MercuryInvoiceHandler` - Queueable for invoice creation
-- `MercuryInvoiceStatusChecker` - Schedulable for polling
-- `MercuryInvoiceStatusQueueable` - Queueable for status checks
-- `MercuryRetryableException` - For retryable errors
-- `MercuryNonRetryableException` - For non-retryable errors
-
-### Test Classes
-- `MercuryServiceTest` - Unit tests for service
-- `MercuryStatusSyncTest` - Status sync tests
-- `MercuryIntegrationFlowTest` - End-to-end tests
-- `MercuryMockFactory` - Mock response factory
-
-### Triggers
-- `OpportunityTrigger` - Fires on stage change to "Invoice"
 
 ## Resources
 
