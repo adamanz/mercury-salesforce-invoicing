@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>59.0</apiVersion>
+    <environments>Default</environments>
+    <interviewLabel>Mercury Setup Wizard {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Mercury Setup Wizard</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <screens>
+        <name>Welcome_Screen</name>
+        <label>Welcome</label>
+        <locationX>176</locationX>
+        <locationY>158</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Configuration_Screen</targetReference>
+        </connector>
+        <fields>
+            <name>Welcome_Header</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 18px;&quot;&gt;Welcome to Mercury Invoicing Setup&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;This wizard will help you configure the Mercury Salesforce integration. Before you begin, make sure you have:&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;✓ A Mercury account with Plus or Pro plan&lt;/p&gt;&lt;p&gt;✓ Your Mercury API token from &lt;a href=&quot;https://app.mercury.com/settings/tokens&quot; rel=&quot;noopener noreferrer&quot; target=&quot;_blank&quot;&gt;Mercury Settings&lt;/a&gt;&lt;/p&gt;&lt;p&gt;✓ Admin access to this Salesforce org&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Click &lt;b&gt;Next&lt;/b&gt; to configure your invoice settings.&lt;/p&gt;</fieldText>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Configuration_Screen</name>
+        <label>Invoice Configuration</label>
+        <locationX>176</locationX>
+        <locationY>278</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Payment_Options_Screen</targetReference>
+        </connector>
+        <fields>
+            <name>Config_Header</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Invoice Settings&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Configure how invoices are created and processed.&lt;/p&gt;</fieldText>
+        </fields>
+        <fields>
+            <name>Invoice_Due_Days</name>
+            <dataType>Number</dataType>
+            <defaultValue>
+                <numberValue>30.0</numberValue>
+            </defaultValue>
+            <fieldText>Days Until Due</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Number of days from invoice creation until the payment is due.</helpText>
+            <isRequired>true</isRequired>
+            <scale>0</scale>
+        </fields>
+        <fields>
+            <name>Trigger_Stage</name>
+            <dataType>String</dataType>
+            <defaultValue>
+                <stringValue>Invoice</stringValue>
+            </defaultValue>
+            <fieldText>Opportunity Stage to Trigger Invoice</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>When an Opportunity moves to this stage, an invoice will be created automatically.</helpText>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Send_Email</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Send invoice email to customer automatically</fieldText>
+            <fieldType>InputField</fieldType>
+        </fields>
+        <fields>
+            <name>Auto_Close</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Automatically close Opportunity as Won when paid</fieldText>
+            <fieldType>InputField</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Payment_Options_Screen</name>
+        <label>Payment Options</label>
+        <locationX>176</locationX>
+        <locationY>398</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Final_Steps_Screen</targetReference>
+        </connector>
+        <fields>
+            <name>Payment_Header</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Payment Methods&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Select which payment methods customers can use to pay invoices.&lt;/p&gt;</fieldText>
+        </fields>
+        <fields>
+            <name>Enable_Credit_Card</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Accept Credit Card payments</fieldText>
+            <fieldType>InputField</fieldType>
+        </fields>
+        <fields>
+            <name>Enable_ACH</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Accept ACH (bank transfer) payments</fieldText>
+            <fieldType>InputField</fieldType>
+        </fields>
+        <fields>
+            <name>Enable_Wire</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <booleanValue>true</booleanValue>
+            </defaultValue>
+            <fieldText>Accept Wire transfer payments</fieldText>
+            <fieldType>InputField</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Final_Steps_Screen</name>
+        <label>Final Steps</label>
+        <locationX>176</locationX>
+        <locationY>518</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Final_Header</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Complete Setup&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Your configuration has been saved! To complete the setup:&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;1. Configure your API Token&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Go to Setup → Named Credentials → Mercury_API&lt;/p&gt;&lt;p&gt;Add a Custom Header with:&lt;/p&gt;&lt;p&gt;• Header Name: &lt;code&gt;Authorization&lt;/code&gt;&lt;/p&gt;&lt;p&gt;• Header Value: &lt;code&gt;Bearer secret-token:YOUR_TOKEN&lt;/code&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;2. Assign Permission Set&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Go to Setup → Permission Sets → Mercury API Access&lt;/p&gt;&lt;p&gt;Assign to users who need to create invoices.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;3. Add &quot;{!Trigger_Stage}&quot; Stage (if needed)&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Go to Setup → Object Manager → Opportunity → Fields → Stage&lt;/p&gt;&lt;p&gt;Ensure &quot;{!Trigger_Stage}&quot; is in your picklist values.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;4. Configure IP Allowlist&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If using a Write token, add your Salesforce IPs to Mercury.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;✅ The invoice status checker is automatically scheduled hourly.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Your Settings Summary:&lt;/b&gt;&lt;/p&gt;&lt;p&gt;• Due Days: {!Invoice_Due_Days}&lt;/p&gt;&lt;p&gt;• Trigger Stage: {!Trigger_Stage}&lt;/p&gt;&lt;p&gt;• Auto-send Email: {!Send_Email}&lt;/p&gt;&lt;p&gt;• Auto-close Won: {!Auto_Close}&lt;/p&gt;&lt;p&gt;• Credit Card: {!Enable_Credit_Card}&lt;/p&gt;&lt;p&gt;• ACH: {!Enable_ACH}&lt;/p&gt;&lt;p&gt;• Wire: {!Enable_Wire}&lt;/p&gt;</fieldText>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>50</locationY>
+        <connector>
+            <targetReference>Welcome_Screen</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+</Flow>

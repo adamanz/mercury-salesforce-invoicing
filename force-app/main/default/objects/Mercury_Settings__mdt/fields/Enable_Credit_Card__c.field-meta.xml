@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enable_Credit_Card__c</fullName>
+    <label>Enable Credit Card</label>
+    <description>Allow customers to pay invoices via credit card</description>
+    <type>Checkbox</type>
+    <defaultValue>true</defaultValue>
+</CustomField>

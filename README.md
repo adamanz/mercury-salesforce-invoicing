@@ -2,15 +2,15 @@
 
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v59.0-blue)](https://developer.salesforce.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Apex Tests](https://img.shields.io/badge/Apex%20Tests-22%20Passing-brightgreen)](force-app/main/default/classes)
+[![Apex Tests](https://img.shields.io/badge/Apex%20Tests-25%20Passing-brightgreen)](force-app/main/default/classes)
 
 Generate and send invoices via Mercury's Accounts Receivable API directly from Salesforce Opportunities. Automatically close opportunities as Won when invoices are paid.
 
-<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO">
+<a href="https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYOzAAO">
   <img src="https://img.shields.io/badge/Install%20Package-Production-blue?style=for-the-badge&logo=salesforce" alt="Install in Production"/>
 </a>
 &nbsp;
-<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO">
+<a href="https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYOzAAO">
   <img src="https://img.shields.io/badge/Install%20Package-Sandbox-orange?style=for-the-badge&logo=salesforce" alt="Install in Sandbox"/>
 </a>
 
@@ -19,11 +19,14 @@ Generate and send invoices via Mercury's Accounts Receivable API directly from S
 ## Features
 
 - **Automatic Customer Sync** - Creates Mercury customers from Salesforce Account/Contact data
-- **Invoice Generation** - Creates and sends invoices when Opportunities reach the "Invoice" stage
+- **Invoice Generation** - Creates and sends invoices when Opportunities reach the configured trigger stage
 - **Status Polling** - Scheduled job polls Mercury for invoice status updates (Mercury doesn't support webhooks)
 - **Auto-Close Won** - Automatically sets Opportunity to "Closed Won" when invoice is paid
 - **Error Tracking** - Comprehensive error logging with retry logic for transient failures
 - **Pre-configured Components** - Named Credential, Remote Site Setting, and Permission Set included
+- **Setup Flow Wizard** - Guided configuration wizard for easy setup
+- **Custom Metadata Settings** - Configure invoice behavior without code changes
+- **Auto-Scheduling** - Post-install script automatically schedules the status checker
 
 ## Architecture
 
@@ -53,8 +56,8 @@ Generate and send invoices via Mercury's Accounts Receivable API directly from S
 ### Option 1: Install Package (Recommended)
 
 Click the button above or use these links:
-- **Production/Developer**: https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO
-- **Sandbox**: https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYLlAAO
+- **Production/Developer**: https://login.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYOzAAO
+- **Sandbox**: https://test.salesforce.com/packaging/installPackage.apexp?p0=04tfo000001FYOzAAO
 
 ### Option 2: Deploy from Source
 
@@ -67,9 +70,9 @@ cd mercury-salesforce-invoicing
 sf project deploy start --target-org your-org-alias
 ```
 
-## Quick Start (3 Steps)
+## Quick Start (2 Steps)
 
-The package includes pre-configured Named Credential, Remote Site Setting, and Permission Set to minimize setup.
+The package includes pre-configured components and **automatically schedules the status checker** on install.
 
 ### Step 1: Add Your Mercury Token
 
@@ -87,25 +90,40 @@ The package includes pre-configured Named Credential, Remote Site Setting, and P
 3. Click **Manage Assignments → Add Assignment**
 4. Select users who need to create invoices
 
-### Step 3: Schedule Status Checker
-
-Run in **Developer Console → Execute Anonymous**:
-
-```apex
-MercuryInvoiceStatusChecker.scheduleHourly();
-```
-
-**That's it!** The integration is ready to use.
+**That's it!** The integration is ready to use. The status checker is automatically scheduled hourly.
 
 ---
 
 ## Additional Setup (Optional)
 
-### Add "Invoice" Stage to Opportunity
+### Run Setup Wizard
 
-If you don't have an "Invoice" stage:
+For guided configuration, run the **Mercury Setup Wizard** flow:
+1. Go to **Setup → Flows**
+2. Find **Mercury Setup Wizard**
+3. Click **Run** to configure settings interactively
+
+### Customize Settings via Custom Metadata
+
+Go to **Setup → Custom Metadata Types → Mercury Settings → Manage Records → Default**:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Invoice Due Days | 30 | Days until invoice is due |
+| Invoice Trigger Stage | Invoice | Opportunity stage that triggers invoicing |
+| Send Email On Create | true | Send invoice email automatically |
+| Auto Close On Payment | true | Close Opportunity as Won when paid |
+| Enable Credit Card | true | Accept credit card payments |
+| Enable ACH | true | Accept ACH bank transfers |
+| Enable Wire | true | Accept wire transfers |
+| Polling Frequency Minutes | 60 | How often to check invoice status |
+
+### Add Custom Stage to Opportunity
+
+If using a custom trigger stage (default is "Invoice"):
 1. Go to **Setup → Object Manager → Opportunity → Fields → Stage**
-2. Add "Invoice" as a picklist value
+2. Add your stage name as a picklist value
+3. Update **Invoice Trigger Stage** in Mercury Settings
 
 ### Configure IP Allowlist (Required for Write Tokens)
 
@@ -121,6 +139,8 @@ Add your Salesforce org's outbound IPs to Mercury:
 | Named Credential | `Mercury_API` | Pre-configured for Mercury API (just add your token) |
 | Remote Site Setting | `Mercury_API` | Allows callouts to api.mercury.com |
 | Permission Set | `Mercury API Access` | Controls who can use the integration |
+| Custom Metadata | `Mercury_Settings__mdt` | Configurable settings for invoice behavior |
+| Flow | `Mercury Setup Wizard` | Guided setup wizard |
 
 ### Custom Fields
 
@@ -146,22 +166,25 @@ Add your Salesforce org's outbound IPs to Mercury:
 - `MercuryInvoiceHandler` - Queueable for invoice creation
 - `MercuryInvoiceStatusChecker` - Schedulable for polling
 - `MercuryInvoiceStatusQueueable` - Queueable for status checks
+- `MercurySettings` - Settings helper class
+- `MercuryPostInstallScript` - Auto-schedules status checker on install
 - `MercuryRetryableException` - For retryable errors (429, 5xx)
 - `MercuryNonRetryableException` - For non-retryable errors (4xx)
 
-### Test Classes (22 tests, 100% pass rate)
+### Test Classes (25 tests, 100% pass rate)
 - `MercuryServiceTest` - Unit tests for service
 - `MercuryStatusSyncTest` - Status sync tests
 - `MercuryIntegrationFlowTest` - End-to-end tests
+- `MercuryPostInstallScriptTest` - Post-install script tests
 - `MercuryMockFactory` - Mock response factory
 
 ### Trigger
-- `OpportunityTrigger` - Fires on stage change to "Invoice"
+- `OpportunityTrigger` - Fires on stage change to configured trigger stage
 
 ## Usage
 
 1. Create an **Opportunity** with an associated **Account** and **Contact** (Contact must have email)
-2. Change the Opportunity Stage to **"Invoice"**
+2. Change the Opportunity Stage to **"Invoice"** (or your configured trigger stage)
 3. The integration will:
    - Create a Mercury customer (if not exists)
    - Generate and send an invoice

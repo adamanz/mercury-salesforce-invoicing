@@ -86,15 +86,22 @@ public class MercuryService {
             });
         }
 
+        // Get settings from Custom Metadata
+        Integer dueDays = MercurySettings.getInvoiceDueDays();
+        Boolean sendEmail = MercurySettings.isSendEmailOnCreate();
+        Boolean creditCardEnabled = MercurySettings.isCreditCardEnabled();
+        Boolean achEnabled = MercurySettings.isACHEnabled();
+        Boolean wireEnabled = MercurySettings.isWireEnabled();
+
         Map<String, Object> invoiceData = new Map<String, Object>{
             'customerId' => mercuryCustomerId,
             'invoiceNumber' => 'SF-' + opp.Id,
-            'dueDate' => Date.today().addDays(30).format(),
+            'dueDate' => Date.today().addDays(dueDays).format(),
             'lineItems' => lineItems,
-            'sendEmailOption' => 'sendNow',
-            'creditCardEnabled' => true,
-            'achEnabled' => true,
-            'wireEnabled' => true
+            'sendEmailOption' => sendEmail ? 'sendNow' : 'doNotSend',
+            'creditCardEnabled' => creditCardEnabled,
+            'achEnabled' => achEnabled,
+            'wireEnabled' => wireEnabled
         };
 
         HttpRequest req = new HttpRequest();

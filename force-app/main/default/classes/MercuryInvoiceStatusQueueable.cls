@@ -22,6 +22,9 @@ public class MercuryInvoiceStatusQueueable implements Queueable, Database.Allows
             return;
         }
 
+        // Get settings
+        Boolean autoCloseOnPayment = MercurySettings.isAutoCloseOnPayment();
+
         List<Opportunity> oppsToUpdate = new List<Opportunity>();
         Datetime now = Datetime.now();
 
@@ -37,8 +40,8 @@ public class MercuryInvoiceStatusQueueable implements Queueable, Database.Allows
                     Mercury_Error_Message__c = null
                 );
 
-                // Auto close won when paid
-                if (status == 'paid') {
+                // Auto close won when paid (if enabled in settings)
+                if (status == 'paid' && autoCloseOnPayment) {
                     oppUpdate.StageName = 'Closed Won';
                 }
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Polling_Frequency_Minutes__c</fullName>
+    <label>Polling Frequency (Minutes)</label>
+    <description>How often to check invoice status (15, 30, or 60 minutes)</description>
+    <type>Number</type>
+    <precision>3</precision>
+    <scale>0</scale>
+    <required>false</required>
+    <defaultValue>60</defaultValue>
+</CustomField>
