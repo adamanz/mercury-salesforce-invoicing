@@ -1,0 +1,20 @@
+{
+  "packageDirectories": [
+    {
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
+      "path": "force-app",
+      "default": true,
+      "package": "Mercury Invoicing",
+      "versionDescription": ""
+    }
+  ],
+  "name": "mercury-invoicing",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "64.0",
+  "packageAliases": {
+    "Mercury Invoicing": "0Hofo0000000FLdCAM",
+    "Mercury Invoicing@0.1.0-1": "04tfo000001FYK9AAO"
+  }
+}
